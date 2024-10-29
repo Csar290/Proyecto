@@ -12,9 +12,9 @@ def obtener_ubicacion():
 
 def main():
     latitud,longitud = obtener_ubicacion()
+    accionIS = AccionSeleccionada.get()
     nombres = inputNombres.get()
     apellidos = inputApellidos.get()
-    accion = inputAccion.get()
 
     load_dotenv()
     user = os.getenv('DB_USER')
@@ -35,13 +35,13 @@ def main():
 
         cursor = conection.cursor()
         query = f"insert into Asistencia (nombres, apellidos, latitud, longitud, accion) values (%s, %s, %s, %s, %s)"
-        values = (nombres, apellidos, latitud, longitud, accion)
+        values = (nombres, apellidos, latitud, longitud, accionIS)
         cursor.execute(query, values)
         conection.commit()
         messagebox.showinfo("Asistencia","Te has registrado correctamente")
         inputNombres.delete(0, tki.END)
         inputApellidos.delete(0, tki.END)
-        inputAccion.delete(0, tki.END)
+        AccionSeleccionada.set(None)
 
     except (Exception, psycopg2.Error) as error:
         messagebox.showerror("Asistencia", f"No se ha podido registrar correctamente: {error}")
@@ -61,15 +61,20 @@ textoNombres.pack()
 inputNombres = tki.Entry(ventana)
 inputNombres.pack()
 
-textoApellidos = tki.Label(ventana, text="Ingreses sus apellios:")
+textoApellidos = tki.Label(ventana, text="Ingrese sus apellios:")
 textoApellidos.pack()
 inputApellidos = tki.Entry(ventana)
 inputApellidos.pack()
 
-textoAccion = tki.Label(ventana, text="Accion (Ingreso/Salida):")
-textoAccion.pack()
-inputAccion = tki.Entry(ventana)
-inputAccion.pack()
+textoAccionRB = tki.Label(ventana, text="Accion")
+textoAccionRB.pack()
+AccionSeleccionada = tki.StringVar()
+AccionSeleccionada.set(None)
+
+acciones = ["Ingreso", "Salida"]
+for accion in acciones:
+    RBotonAccion = tki.Radiobutton(ventana, text=accion, variable=AccionSeleccionada, value=accion)
+    RBotonAccion.pack()
 
 botonRegistro = tki.Button(ventana, text="Registrar", command=main)
 botonRegistro.pack()
